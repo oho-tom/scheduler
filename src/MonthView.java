@@ -1,6 +1,7 @@
 import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
+import java.util.Calendar;
 
 public class MonthView extends HttpServlet{
 
@@ -9,6 +10,12 @@ public class MonthView extends HttpServlet{
 
         res.setContentType("text/html;charset=utf-8");
         PrintWriter out = res.getWriter();
+
+        int[] calendarDay;
+        int count;
+
+        calendarDay = new int[42];  /* 最大で7日×6週 */
+        count = 0;
 
         StringBuffer sb = new StringBuffer();
 
@@ -34,26 +41,39 @@ public class MonthView extends HttpServlet{
         sb.append("</head>");
         sb.append("<body>");
 
-        sb.append("<p>2006年11月</p>");
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DATE);
+
+        /* 日付データを配列に格納 */
+        count = setDateArray(year, month, day, calendarDay, count);
+
+        sb.append("<p>" + year + "年" + (month + 1) + "月</p>");
 
         sb.append("<table>");
 
         sb.append("<tr><td class=\"week\">日</td><td class=\"week\">月</td><td class=\"week\">火</td><td class=\"week\">水</td><td class=\"week\">木</td><td class=\"week\">金</td><td class=\"week\">土</td></tr>");
 
-        sb.append("<tr><td class=\"otherday\">29</td><td class=\"otherday\">30</td><td class=\"otherday\">31</td><td class=\"day\">1</td><td class=\"day\">2</td><td class=\"day\">3</td><td class=\"day\">4</td></tr>");
-        sb.append(createScheduleStr());
+        int weekCount = count / 7;
 
-        sb.append("<tr><td class=\"day\">5</td><td class=\"day\">6</td><td class=\"day\">7</td><td class=\"day\">8</td><td class=\"day\">9</td><td class=\"day\">10</td><td class=\"day\">11</td></tr>");
-        sb.append(createScheduleStr());
+        for (int i = 0 ; i < weekCount ; i++){
+            sb.append("<tr>");
 
-        sb.append("<tr><td class=\"day\">12</td><td class=\"day\">13</td><td class=\"day\">14</td><td class=\"day\">15</td><td class=\"day\">16</td><td class=\"day\">17</td><td class=\"day\">18</td></tr>");
-        sb.append(createScheduleStr());
+            for (int j = i * 7 ; j < i * 7 + 7 ; j++){
+                if (calendarDay[j] > 35){
+                    sb.append("<td class=\"otherday\">");
+                    sb.append(calendarDay[j] - 35);
+                }else{
+                    sb.append("<td class=\"day\">");
+                    sb.append(calendarDay[j]);
+                }
+                sb.append("</td>");
+            }
 
-        sb.append("<tr><td class=\"day\">19</td><td class=\"day\">20</td><td class=\"day\">21</td><td class=\"day\">22</td><td class=\"day\">23</td><td class=\"day\">24</td><td class=\"day\">25</td></tr>");
-        sb.append(createScheduleStr());
-
-        sb.append("<tr><td class=\"day\">26</td><td class=\"day\">27</td><td class=\"day\">28</td><td class=\"day\">29</td><td class=\"day\">30</td><td class=\"otherday\">1</td><td class=\"otherday\">2</td></tr>");
-        sb.append(createScheduleStr());
+            sb.append("</tr>");
+            sb.append(createScheduleStr());
+        }
 
         sb.append("</table>");
 
@@ -73,5 +93,43 @@ public class MonthView extends HttpServlet{
         sb.append("</tr>");
 
         return (new String(sb));
+    }
+
+    protected int setDateArray(int year, int month, int day, int[] calendarDay, int count){
+
+        Calendar calendar = Calendar.getInstance();
+
+        /* 今月が何曜日から開始されているか確認する */
+        calendar.set(year, month, 1);
+        int startWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        System.out.println("今月の曜日は" + startWeek + "から");
+
+        /* 先月が何日までだったかを確認する */
+        calendar.set(year, month, 0);
+        int beforeMonthlastDay = calendar.get(Calendar.DATE);
+        System.out.println("先月は" + beforeMonthlastDay + "日まで");
+
+        /* 今月が何日までかを確認する */
+        calendar.set(year, month + 1, 0);
+        int thisMonthlastDay = calendar.get(Calendar.DATE);
+        System.out.println("今月は" + thisMonthlastDay + "日まで\r\n");
+
+        /* 先月分の日付を格納する */
+        for (int i = startWeek - 2 ; i >= 0 ; i--){
+            calendarDay[count++] = beforeMonthlastDay - i + 35;
+        }
+
+        /* 今月分の日付を格納する */
+        for (int i = 1 ; i <= thisMonthlastDay ; i++){
+            calendarDay[count++] = i;
+        }
+
+        /* 翌月分の日付を格納する */
+        int nextMonthDay = 1;
+        while (count % 7 != 0){
+            calendarDay[count++] = 35 + nextMonthDay++;
+        }
+
+        return count;
     }
 }
