@@ -98,6 +98,7 @@ public class MonthView extends HttpServlet{
         int weekCount = count / 7;
 
         for (int i = 0 ; i < weekCount ; i++){
+            /* スケジュールの日付画面を作成する */
             sb.append("<tr>");
 
             for (int j = i * 7 ; j < i * 7 + 7 ; j++){
@@ -112,7 +113,9 @@ public class MonthView extends HttpServlet{
             }
 
             sb.append("</tr>");
-            sb.append(createScheduleStr());
+
+            /* カレンダーのスケジュール登録画面を作成する */
+            sb.append(createScheduleStr(year, month, i * 7, calendarDay));
         }
 
         sb.append("</table>");
@@ -123,13 +126,36 @@ public class MonthView extends HttpServlet{
         out.println(new String(sb));
     }
 
-    protected String createScheduleStr(){
+    /* スケジュール登録へのリンクを設定する */
+    protected String createScheduleStr(int year, int month, int startDayNo, int[] calendarDay){
         StringBuffer sb = new StringBuffer();
 
         sb.append("<tr>");
-        for (int i = 0 ; i < 7 ; i++){
-            sb.append("<td class=\"sche\"><img src=\"./img/memo.png\" width=\"14\" height=\"16\"></td>");
+
+        for (int i = startDayNo ; i < startDayNo + 7 ; i++){
+            if (calendarDay[i] > 35){
+                /* 前月及び翌月の箇所にはアイコンは表示しない */
+                sb.append("<td class=\"sche\"></td>");
+            }else{
+                sb.append("<td class=\"sche\">");
+                sb.append("<a href=\"/schedule/NewSchedule");
+
+                /* パラメータの作成 */
+                sb.append("?YEAR=");
+                sb.append(year);
+                sb.append("&MONTH=");
+                sb.append(month);
+                sb.append("&DAY=");
+                sb.append(calendarDay[i]);
+
+                sb.append("\">");
+                sb.append("<img src=\"./img/memo.png\" width=\"14\" height=\"16\">");
+                sb.append("</a>");
+                sb.append("</td>");
+            }
+            sb.append("</td>");
         }
+
         sb.append("</tr>");
 
         return (new String(sb));
