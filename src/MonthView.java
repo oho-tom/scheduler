@@ -14,8 +14,52 @@ public class MonthView extends HttpServlet{
         int[] calendarDay;
         int count;
 
+        int year;
+        int month;
+        int day = 1;
+
         calendarDay = new int[42];  /* 最大で7日×6週 */
         count = 0;
+
+        String param = req.getParameter("YEAR");
+        if (param == null || param.length() == 0){
+            year = -999;
+        }else{
+            try{
+                year = Integer.parseInt(param);
+            }catch (NumberFormatException e){
+                year = -999;
+            }
+        }
+
+        param = req.getParameter("MONTH");
+        if (param == null || param.length() == 0){
+            month = -999;
+        }else{
+            try{
+                month = Integer.parseInt(param);
+            }catch (NumberFormatException e){
+                month = -999;
+            }
+        }
+
+        /* パラメータが指定されていない場合は本日の日付を設定 */
+        if (year == -999 || month == -999){
+            Calendar calendar = Calendar.getInstance();
+            year = calendar.get(Calendar.YEAR);
+            month = calendar.get(Calendar.MONTH);
+            day = calendar.get(Calendar.DATE);
+        }else{
+            if (month == 12){
+                month = 0;
+                year++;
+            }
+
+            if (month == -1){
+                month = 11;
+                year--;
+            }
+        }
 
         StringBuffer sb = new StringBuffer();
 
@@ -35,21 +79,17 @@ public class MonthView extends HttpServlet{
         sb.append("td.otherday{background-color:#f5f5f5;color:#d3d3d3;text-align:right;font-size:0.75em;}");
         sb.append("td.sche{background-color:#fffffff;text-align:left;height:80px;}");
         sb.append("img{border:0px;}");
-        sb.append("p{font-size:0.75em;}");
+        sb.append("span.small{font-size:0.75em;}");
         sb.append("</style>");
 
         sb.append("</head>");
         sb.append("<body>");
 
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DATE);
-
         /* 日付データを配列に格納 */
         count = setDateArray(year, month, day, calendarDay, count);
 
-        sb.append("<p>" + year + "年" + (month + 1) + "月</p>");
+        /* 年月のリンク作成 */
+        sb.append(createMonthLink(year, month));
 
         sb.append("<table>");
 
@@ -96,7 +136,6 @@ public class MonthView extends HttpServlet{
     }
 
     protected int setDateArray(int year, int month, int day, int[] calendarDay, int count){
-
         Calendar calendar = Calendar.getInstance();
 
         /* 今月が何曜日から開始されているか確認する */
@@ -132,4 +171,32 @@ public class MonthView extends HttpServlet{
 
         return count;
     }
+
+    protected String createMonthLink(int year, int month){
+        StringBuffer sb = new StringBuffer();
+
+        sb.append("<p>");
+
+        sb.append("<a href=\"/schedule/MonthView?YEAR=");
+        sb.append(year);
+        sb.append("&MONTH=");
+        sb.append(month - 1);
+        sb.append("\"><span class=\"small\">前月</span></a>&nbsp;&nbsp;");
+
+        sb.append(year);
+        sb.append("年");
+        sb.append(month + 1);
+        sb.append("月&nbsp;&nbsp;");
+
+        sb.append("<a href=\"/schedule/MonthView?YEAR=");
+        sb.append(year);
+        sb.append("&MONTH=");
+        sb.append(month + 1);
+        sb.append("\"><span class=\"small\">翌月</span></a>");
+
+        sb.append("</p>");
+
+        return (new String(sb));
+    }
+
 }
