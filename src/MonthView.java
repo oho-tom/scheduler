@@ -2,8 +2,38 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.util.Calendar;
+import java.sql.*;
 
 public class MonthView extends HttpServlet{
+
+    protected Connection conn = null;
+
+    public void init() throws ServletException{
+        String url = "jdbc:mysql://localhost/servletschedule";
+        String user = "scheduleuser";
+        String password = "schedulepass";
+
+        try {
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            conn = DriverManager.getConnection(url, user, password);
+        }catch (ClassNotFoundException e){
+            log("ClassNotFoundException:" + e.getMessage());
+        }catch (SQLException e){
+            log("SQLException:" + e.getMessage());
+        }catch (Exception e){
+            log("Exception:" + e.getMessage());
+        }
+    }
+
+    public void destory(){
+        try{
+            if (conn != null){
+                conn.close();
+            }
+        }catch (SQLException e){
+            log("SQLException:" + e.getMessage());
+        }
+    }
 
     public void doGet(HttpServletRequest req, HttpServletResponse res)
         throws ServletException, IOException{
@@ -150,7 +180,45 @@ public class MonthView extends HttpServlet{
 
                 sb.append("\">");
                 sb.append("<img src=\"./img/memo.png\" width=\"14\" height=\"16\">");
-                sb.append("</a>");
+                sb.append("</a><br>");
+
+                /* スケジュールの表示 */
+
+                sb.append("<span class=\"small\">");
+
+                try {
+                    String sql = "SELECT * FROM schedule WHERE userid = ? and scheduledate = ? ORDER BY starttime";
+                    PreparedStatement pstmt = conn.prepareStatement(sql);
+
+                    String startDateStr = year + "-" + (month + 1) + "-" + calendarDay[i];
+                    pstmt.setInt(1, 1);
+                    pstmt.setString(2, startDateStr);
+
+                    ResultSet rs = pstmt.executeQuery();
+
+                    while(rs.next()){
+                        String starttime = rs.getString("starttime");
+                        String endtime = rs.getString("endtime");
+                        String schedule = rs.getString("schedule");
+
+                        if (starttime == null || endtime == null){
+                            sb.append("* " + schedule + "<br>");
+                        }else{
+                            String startTimeStr = starttime.substring(0, 5);
+                            String endTimeStr = endtime.substring(0, 5);
+                            sb.append(startTimeStr + "-" + endTimeStr + " " + schedule + "<br>");
+                        }
+                    }
+
+                    rs.close();
+                    pstmt.close();
+
+                }catch (SQLException e){
+                    log("SQLException:" + e.getMessage());
+                }
+
+                sb.append("</span>");
+
                 sb.append("</td>");
             }
             sb.append("</td>");
