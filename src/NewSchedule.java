@@ -2,8 +2,38 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.util.Calendar;
+import java.sql.*;
 
 public class NewSchedule extends HttpServlet{
+
+    protected Connection conn = null;
+
+    public void init() throws ServletException{
+        String url = "jdbc:mysql://localhost/servletschedule";
+        String user = "scheduleuser";
+        String password = "schedulepass";
+
+        try {
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            conn = DriverManager.getConnection(url, user, password);
+        }catch (ClassNotFoundException e){
+            log("ClassNotFoundException:" + e.getMessage());
+        }catch (SQLException e){
+            log("SQLException:" + e.getMessage());
+        }catch (Exception e){
+            log("Exception:" + e.getMessage());
+        }
+    }
+
+    public void destory(){
+        try{
+            if (conn != null){
+                conn.close();
+            }
+        }catch (SQLException e){
+            log("SQLException:" + e.getMessage());
+        }
+    }
 
     public void doGet(HttpServletRequest req, HttpServletResponse res)
         throws ServletException, IOException{
@@ -97,60 +127,119 @@ public class NewSchedule extends HttpServlet{
         sb.append("\">カレンダーへ戻る</a>]");
         sb.append("</p>");
 
+        String[] scheduleArray = new String[49];
+        int[] widthArray = new int[49];
+
+        for (int i = 0 ; i < 49 ; i++){
+            scheduleArray[i] = "";
+            widthArray[i] = 0;
+        }
+
+        try {
+            String sql = "SELECT * FROM schedule WHERE userid = ? and scheduledate = ? ORDER BY starttime";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            String startDateStr = year + "-" + (month + 1) + "-" + day;
+            pstmt.setInt(1, 1);
+            pstmt.setString(2, startDateStr);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while(rs.next()){
+                String starttime = rs.getString("starttime");
+                String endtime = rs.getString("endtime");
+                String schedule = rs.getString("schedule");
+
+                if (starttime == null || endtime == null){
+                    widthArray[0] = 1;
+                    scheduleArray[0] = scheduleArray[0] + schedule + "<br>";
+                }else{
+                    String startTimeStr = starttime.substring(0, 2);
+                    String startMinuteStr = starttime.substring(3, 5);
+
+                    int startTimeNum = Integer.parseInt(startTimeStr);
+                    int index = startTimeNum * 2 + 1;
+                    if (startMinuteStr.equals("30")){
+                        index++;
+                    }
+
+                    if (widthArray[index] == 0){
+                    /* 既にデータが入っていた場合は異常な状態なので無視する */
+
+                        String endTimeStr = endtime.substring(0, 2);
+                        String endMinuteStr = endtime.substring(3, 5);
+
+                        int endTimeNum = Integer.parseInt(endTimeStr);
+                        int width = (endTimeNum - startTimeNum) * 2;
+
+                        if (startMinuteStr.equals("30")){
+                            width--;
+                        }
+
+                        if (endMinuteStr.equals("30")){
+                            width++;
+                        }
+
+                        String totalTime = startTimeStr + ":" + startMinuteStr + "-" + endTimeStr + ":" + endMinuteStr + " ";
+                        scheduleArray[index] = totalTime + schedule;
+                        widthArray[index] = width;
+
+                        /* 同じスケジュールの先頭以外の箇所には「-1」を設定 */
+                        for (int i = 1 ; i < width ; i++){
+                            widthArray[index + i] = -1;
+                        }
+                    }
+                }
+            }
+
+            rs.close();
+            pstmt.close();
+
+        }catch (SQLException e){
+            log("SQLException:" + e.getMessage());
+        }
+
         sb.append("<div id=\"contents\">");
 
         sb.append("<div id=\"left\">");
 
         sb.append("<table class=\"sche\">");
         sb.append("<tr><td class=\"top\" style=\"width:80px\">時刻</td><td class=\"top\" style=\"width:300px\">予定</td></tr>");
-        sb.append("<tr><td class=\"time\">00:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">01:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">02:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">03:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">04:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">05:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">06:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">07:00</td><td class=\"ex\" rowspan=\"3\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">08:00</td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">09:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">10:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">11:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">12:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">13:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">14:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">15:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">16:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">17:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">18:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">19:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">20:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">21:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">22:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
-        sb.append("<tr><td class=\"time\">23:00</td><td class=\"contents\"></td></tr>");
-        sb.append("<tr><td class=\"timeb\"></td><td class=\"contentsb\"></td></tr>");
+
+        sb.append("<tr><td class=\"timeb\">未定</td>");
+        sb.append("<td class=\"contentsb\">");
+        if (widthArray[0] == 1){
+            sb.append(scheduleArray[0]);
+        }
+        sb.append("</td></tr>");
+
+        for (int i = 1 ; i < 49 ; i++){
+            if (i % 2 == 1){
+                sb.append("<tr><td class=\"time\">");
+                sb.append(i / 2);
+                sb.append(":00</td>");
+            }else{
+                sb.append("<tr><td class=\"timeb\"></td>");
+            }
+
+            if (widthArray[i] != 0){
+                if (widthArray[i] != -1){
+                    sb.append("<td class=\"ex\" rowspan=\"");
+                    sb.append(widthArray[i]);
+                    sb.append("\">");
+
+                    sb.append(scheduleArray[i]);
+                }
+            }else{
+                if (i % 2 == 1){
+                    sb.append("<td class=\"contents\">");
+                }else{
+                    sb.append("<td class=\"contentsb\">");
+                }
+            }
+
+            sb.append("</td></tr>");
+        }
 
         sb.append("</table>");
 
