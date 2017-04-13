@@ -11,10 +11,50 @@ public class NewSchedule extends HttpServlet{
         res.setContentType("text/html;charset=utf-8");
         PrintWriter out = res.getWriter();
 
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DATE);
+        int year;
+        int month;
+        int day;
+
+        String param = req.getParameter("YEAR");
+        if (param == null || param.length() == 0){
+            year = -999;
+        }else{
+            try{
+                year = Integer.parseInt(param);
+            }catch (NumberFormatException e){
+                year = -999;
+            }
+        }
+
+        param = req.getParameter("MONTH");
+        if (param == null || param.length() == 0){
+            month = -999;
+        }else{
+            try{
+                month = Integer.parseInt(param);
+            }catch (NumberFormatException e){
+                month = -999;
+            }
+        }
+
+        param = req.getParameter("DAY");
+        if (param == null || param.length() == 0){
+            day = -999;
+        }else{
+            try{
+                day = Integer.parseInt(param);
+            }catch (NumberFormatException e){
+                day = -999;
+            }
+        }
+
+        /* パラメータが指定されていない場合は本日の日付を設定 */
+        if (year == -999 || month == -999 || day == -999){
+            Calendar calendar = Calendar.getInstance();
+            year = calendar.get(Calendar.YEAR);
+            month = calendar.get(Calendar.MONTH);
+            day = calendar.get(Calendar.DATE);
+        }
 
         StringBuffer sb = new StringBuffer();
 
@@ -47,7 +87,15 @@ public class NewSchedule extends HttpServlet{
         sb.append("</head>");
         sb.append("<body>");
 
-        sb.append("<p>スケジュール登録</p>");
+        sb.append("<p>");
+        sb.append("スケジュール登録&nbsp;&nbsp;");
+        sb.append("[<a href=\"/schedule/MonthView");
+        sb.append("?YEAR=");
+        sb.append(year);
+        sb.append("&MONTH=");
+        sb.append(month);
+        sb.append("\">カレンダーへ戻る</a>]");
+        sb.append("</p>");
 
         sb.append("<div id=\"contents\">");
 
@@ -117,7 +165,7 @@ public class NewSchedule extends HttpServlet{
         sb.append("<td nowrap>日付</td>");
         sb.append("<td>");
         sb.append("<select name=\"YEAR\">");
-        for (int i = 2005 ; i <= 2010 ; i++){
+        for (int i = 2000 ; i <= 2099 ; i++){
             sb.append("<option value=\"");
             sb.append(i);
             sb.append("\"");
