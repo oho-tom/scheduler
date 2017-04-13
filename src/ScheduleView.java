@@ -4,7 +4,7 @@ import javax.servlet.http.*;
 import java.util.Calendar;
 import java.sql.*;
 
-public class NewSchedule extends HttpServlet{
+public class ScheduleView extends HttpServlet{
 
     protected Connection conn = null;
 
@@ -41,49 +41,58 @@ public class NewSchedule extends HttpServlet{
         res.setContentType("text/html;charset=utf-8");
         PrintWriter out = res.getWriter();
 
-        int year;
-        int month;
-        int day;
+        int year = -1;
+        int month = -1;
+        int day = -1;
+        int currentscheduleid;
+        String currentStartTime = "";
+        String currentEndTime = "";
+        String currentSchedule = "";
+        String currentMemo = "";
 
-        String param = req.getParameter("YEAR");
+        String param = req.getParameter("ID");
         if (param == null || param.length() == 0){
-            year = -999;
+            currentscheduleid = -1;
         }else{
             try{
-                year = Integer.parseInt(param);
+                currentscheduleid = Integer.parseInt(param);
             }catch (NumberFormatException e){
-                year = -999;
+                currentscheduleid = -1;
             }
         }
 
-        param = req.getParameter("MONTH");
-        if (param == null || param.length() == 0){
-            month = -999;
-        }else{
-            try{
-                month = Integer.parseInt(param);
-            }catch (NumberFormatException e){
-                month = -999;
-            }
+        /* パラメータが不正な場合はトップページへリダイレクト */
+        if (currentscheduleid == -1){
+            res.sendRedirect("/schedule/top.html");
         }
 
-        param = req.getParameter("DAY");
-        if (param == null || param.length() == 0){
-            day = -999;
-        }else{
-            try{
-                day = Integer.parseInt(param);
-            }catch (NumberFormatException e){
-                day = -999;
-            }
-        }
+        try {
+            String sql = "SELECT * FROM schedule WHERE id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
 
-        /* パラメータが指定されていない場合は本日の日付を設定 */
-        if (year == -999 || month == -999 || day == -999){
-            Calendar calendar = Calendar.getInstance();
-            year = calendar.get(Calendar.YEAR);
-            month = calendar.get(Calendar.MONTH);
-            day = calendar.get(Calendar.DATE);
+            pstmt.setInt(1, currentscheduleid);
+            ResultSet rs = pstmt.executeQuery();
+
+            rs.next();
+            String scheduledate = rs.getString("scheduledate");
+            String yearStr = scheduledate.substring(0, 4);
+            String monthStr = scheduledate.substring(5, 7);
+            String dayStr = scheduledate.substring(8, 10);
+
+            year = Integer.parseInt(yearStr);
+            month = Integer.parseInt(monthStr) - 1;
+            day = Integer.parseInt(dayStr);
+
+            currentStartTime = rs.getString("starttime");
+            currentEndTime = rs.getString("endtime");
+            currentSchedule = rs.getString("schedule");
+            currentMemo = rs.getString("schedulememo");
+
+            rs.close();
+            pstmt.close();
+
+        }catch (SQLException e){
+            log("SQLException:" + e.getMessage());
         }
 
         StringBuffer sb = new StringBuffer();
@@ -105,6 +114,9 @@ public class NewSchedule extends HttpServlet{
         sb.append("td.contents{background-color:#ffffff;border-bottom:1px dotted #a9a9a9;}");
         sb.append("td.contentsb{background-color:#ffffff;border-bottom:1px solid #a9a9a9;}");
         sb.append("td.ex{background-color:#ffebcd;border:1px solid #8b0000;}");
+        sb.append("table.view{border:1px solid #a9a9a9;padding:0px;margin:0px;border-collapse:collapse;width:250px}");
+        sb.append("table.view td{border:1px solid #a9a9a9;}");
+        sb.append("table.view td.left{width:70px;background-color:#f0f8ff;}");
         sb.append("img{border:0px;}");
         sb.append("p{font-size:0.75em;}");
 
@@ -118,7 +130,7 @@ public class NewSchedule extends HttpServlet{
         sb.append("<body>");
 
         sb.append("<p>");
-        sb.append("スケジュール登録&nbsp;&nbsp;");
+        sb.append("既存スケジュール確認&nbsp;&nbsp;");
         sb.append("[<a href=\"/schedule/MonthView");
         sb.append("?YEAR=");
         sb.append(year);
@@ -153,7 +165,16 @@ public class NewSchedule extends HttpServlet{
 
                 if (starttime == null || endtime == null){
                     widthArray[0] = 1;
-                    scheduleArray[0] = scheduleArray[0] + schedule + "<br>";
+
+                    StringBuffer sbSchedule = new StringBuffer();
+                    sbSchedule.append("<a href=\"/schedule/ScheduleView?ID=");
+                    sbSchedule.append(id);
+                    sbSchedule.append("\">");
+                    sbSchedule.append(schedule);
+                    sbSchedule.append("</a>");
+
+                    scheduleArray[0] = scheduleArray[0] + (new String(sbSchedule)) + "<br>";
+
                 }else{
                     String startTimeStr = starttime.substring(0, 2);
                     String startMinuteStr = starttime.substring(3, 5);
@@ -262,114 +283,42 @@ public class NewSchedule extends HttpServlet{
 
         sb.append("<div id=\"right\">");
 
-        sb.append("<form method=\"post\" action=\"/schedule/ScheduleInsert\">");
-        sb.append("<table>");
-        sb.append("<tr>");
-
-        sb.append("<td nowrap>日付</td>");
-        sb.append("<td>");
-        sb.append("<select name=\"YEAR\">");
-        for (int i = 2000 ; i <= 2099 ; i++){
-            sb.append("<option value=\"");
-            sb.append(i);
-            sb.append("\"");
-            if (i == year){
-                sb.append(" selected");
-            }
-            sb.append(">");
-            sb.append(i);
-            sb.append("年");
+        sb.append("<table class=\"view\">");
+        sb.append("<tr><td class=\"left\">日付</td><td>");
+        sb.append(year);
+        sb.append("年");
+        sb.append(month + 1);
+        sb.append("月");
+        sb.append(day);
+        sb.append("日");
+        sb.append("</td></tr>");
+        sb.append("<tr><td class=\"left\">時間</td><td>");
+        if (currentStartTime == null){
+            sb.append("未定");
+        }else{
+            sb.append(currentStartTime.substring(0, 5));
+            sb.append(" - ");
+            sb.append(currentEndTime.substring(0, 5));
         }
-        sb.append("</select> ");
-
-        sb.append("<select name=\"MONTH\">");
-        for (int i = 1 ; i <= 12 ; i++){
-            sb.append("<option value=\"");
-            sb.append(i);
-            sb.append("\"");
-            if (i == (month + 1)){
-                sb.append(" selected");
-            }
-            sb.append(">");
-            sb.append(i);
-            sb.append("月");
-        }
-        sb.append("</select> ");
-
-        sb.append("<select name=\"DAY\">");
-        int monthLastDay = getMonthLastDay(year, month, day);
-        for (int i = 1 ; i <= monthLastDay ; i++){
-            sb.append("<option value=\"");
-            sb.append(i);
-            sb.append("\"");
-            if (i == day){
-                sb.append(" selected");
-            }
-            sb.append(">");
-            sb.append(i);
-            sb.append("日");
-        }
-        sb.append("</select>");
-
-        sb.append("</td>");
-        sb.append("</tr>");
-
-        sb.append("<tr>");
-        sb.append("<td nowrap>時刻</td>");
-        sb.append("<td>");
-        sb.append("<select name=\"SHOUR\">");
-        sb.append("<option value=\"\" selected>--時");
-        for (int i = 0 ; i <= 23 ; i++){
-            sb.append("<option value=\"");
-            sb.append(i);
-            sb.append("\">");
-            sb.append(i);
-            sb.append("時");
-        }
-        sb.append("</select> ");
-
-        sb.append("<select name=\"SMINUTE\">");
-        sb.append("<option value=\"0\">00分");
-        sb.append("<option value=\"30\">30分");
-        sb.append("</select>");
-
-        sb.append(" -- ");
-
-        sb.append("<select name=\"EHOUR\">");
-        sb.append("<option value=\"\" selected>--時");
-        for (int i = 0 ; i <= 23 ; i++){
-            sb.append("<option value=\"");
-            sb.append(i);
-            sb.append("\">");
-            sb.append(i);
-            sb.append("時");
-        }
-        sb.append("</select> ");
-
-        sb.append("<select name=\"EMINUTE\">");
-        sb.append("<option value=\"0\">00分");
-        sb.append("<option value=\"30\">30分");
-        sb.append("</select>");
-
-        sb.append("</td>");
-        sb.append("</tr>");
-
-        sb.append("<tr>");
-        sb.append("<td nowrap>予定</td>");
-        sb.append("<td><input type=\"text\" name=\"PLAN\" value=\"\" size=\"30\" maxlength=\"100\">");
-        sb.append("</td>");
-        sb.append("</tr>");
-
-        sb.append("<tr>");
-        sb.append("<td valign=\"top\" nowrap>メモ</td>");
-        sb.append("<td><textarea name=\"MEMO\" cols=\"30\" rows=\"10\" wrap=\"virtual\"></textarea></td>");
-        sb.append("</tr>");
+        sb.append("</td></tr>");
+        sb.append("<tr><td class=\"left\">スケジュール</td><td>");
+        sb.append(currentSchedule);
+        sb.append("</td></tr>");
+        sb.append("<tr><td class=\"left\" style=\"height:150px;\">メモ</td><td>");
+        currentMemo = currentMemo.replaceAll("\r\n", "<br>");
+        sb.append(currentMemo);
+        sb.append("</td></tr>");
         sb.append("</table>");
 
         sb.append("<p>");
-        sb.append("<input type=\"submit\" name=\"Register\" value=\"登録する\"> <input type=\"reset\" value=\"入力し直す\">");
-        sb.append("<p>");
-        sb.append("</form>");
+        sb.append("[<a href=\"/schedule/EditSchedule?ID=");
+        sb.append(currentscheduleid);
+        sb.append("\">スケジュールの変更</a>]");
+        sb.append("&nbsp;&nbsp;");
+        sb.append("[<a href=\"/schedule/DeleteCheck?ID=");
+        sb.append(currentscheduleid);
+        sb.append("\">スケジュールの削除</a>]");
+        sb.append("</p>");
 
         sb.append("</div>");
         sb.append("</div>");

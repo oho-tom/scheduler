@@ -34,4 +34,14 @@
       <servlet-name>ScheduleInsert</servlet-name>
       <url-pattern>/ScheduleInsert</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+      <servlet-name>ScheduleView</servlet-name>
+      <servlet-class>ScheduleView</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>ScheduleView</servlet-name>
+      <url-pattern>/ScheduleView</url-pattern>
+    </servlet-mapping>
 </web-app>

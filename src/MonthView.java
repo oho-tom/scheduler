@@ -197,17 +197,24 @@ public class MonthView extends HttpServlet{
                     ResultSet rs = pstmt.executeQuery();
 
                     while(rs.next()){
+                        int id = rs.getInt("id");
                         String starttime = rs.getString("starttime");
                         String endtime = rs.getString("endtime");
                         String schedule = rs.getString("schedule");
 
                         if (starttime == null || endtime == null){
-                            sb.append("* " + schedule + "<br>");
+                            sb.append("* ");
                         }else{
-                            String startTimeStr = starttime.substring(0, 5);
-                            String endTimeStr = endtime.substring(0, 5);
-                            sb.append(startTimeStr + "-" + endTimeStr + " " + schedule + "<br>");
+                            sb.append(starttime.substring(0, 5));
+                            sb.append("-");
+                            sb.append(endtime.substring(0, 5));
+                            sb.append(" ");
                         }
+                        sb.append("<a href=\"/schedule/ScheduleView?ID=");
+                        sb.append(id);
+                        sb.append("\">");
+                        sb.append(schedule);
+                        sb.append("</a><br>");
                     }
 
                     rs.close();
