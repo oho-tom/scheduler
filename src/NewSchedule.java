@@ -158,7 +158,7 @@ public class NewSchedule extends HttpServlet{
 
         sb.append("<div id=\"right\">");
 
-        sb.append("<form method=\"post\" action=\"\">");
+        sb.append("<form method=\"post\" action=\"/schedule/ScheduleInsert\">");
         sb.append("<table>");
         sb.append("<tr>");
 
