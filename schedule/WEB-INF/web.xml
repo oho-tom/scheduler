@@ -65,4 +65,24 @@
         <url-pattern>/ScheduleUpdate</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>DeleteCheck</servlet-name>
+        <servlet-class>DeleteCheck</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DeleteCheck</servlet-name>
+        <url-pattern>/DeleteCheck</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ScheduleDelete</servlet-name>
+        <servlet-class>ScheduleDelete</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ScheduleDelete</servlet-name>
+        <url-pattern>/ScheduleDelete</url-pattern>
+    </servlet-mapping>
+
 </web-app>
