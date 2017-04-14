@@ -26,22 +26,43 @@
     </servlet-mapping>
 
     <servlet>
-      <servlet-name>ScheduleInsert</servlet-name>
-      <servlet-class>ScheduleInsert</servlet-class>
+        <servlet-name>ScheduleInsert</servlet-name>
+        <servlet-class>ScheduleInsert</servlet-class>
     </servlet>
 
     <servlet-mapping>
-      <servlet-name>ScheduleInsert</servlet-name>
-      <url-pattern>/ScheduleInsert</url-pattern>
+        <servlet-name>ScheduleInsert</servlet-name>
+        <url-pattern>/ScheduleInsert</url-pattern>
     </servlet-mapping>
 
     <servlet>
-      <servlet-name>ScheduleView</servlet-name>
-      <servlet-class>ScheduleView</servlet-class>
+        <servlet-name>ScheduleView</servlet-name>
+        <servlet-class>ScheduleView</servlet-class>
     </servlet>
 
     <servlet-mapping>
-      <servlet-name>ScheduleView</servlet-name>
-      <url-pattern>/ScheduleView</url-pattern>
+        <servlet-name>ScheduleView</servlet-name>
+        <url-pattern>/ScheduleView</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>EditSchedule</servlet-name>
+        <servlet-class>EditSchedule</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>EditSchedule</servlet-name>
+        <url-pattern>/EditSchedule</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ScheduleUpdate</servlet-name>
+        <servlet-class>ScheduleUpdate</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ScheduleUpdate</servlet-name>
+        <url-pattern>/ScheduleUpdate</url-pattern>
+    </servlet-mapping>
+
 </web-app>

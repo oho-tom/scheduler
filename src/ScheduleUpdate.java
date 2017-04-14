@@ -3,7 +3,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import java.sql.*;
 
-public class ScheduleInsert extends HttpServlet{
+public class ScheduleUpdate extends HttpServlet{
 
     protected Connection conn = null;
 
@@ -41,6 +41,7 @@ public class ScheduleInsert extends HttpServlet{
         res.setContentType("text/html;charset=utf-8");
         PrintWriter out = res.getWriter();
 
+        int id;
         int year;
         int month;
         int day;
@@ -51,7 +52,18 @@ public class ScheduleInsert extends HttpServlet{
         String plan;
         String memo;
 
-        String param = req.getParameter("YEAR");
+        String param = req.getParameter("ID");
+        if (param == null || param.length() == 0){
+            id = -999;
+        }else{
+            try{
+                id = Integer.parseInt(param);
+            }catch (NumberFormatException e){
+                id = -999;
+            }
+        }
+
+        param = req.getParameter("YEAR");
         if (param == null || param.length() == 0){
             year = -999;
         }else{
@@ -150,8 +162,8 @@ public class ScheduleInsert extends HttpServlet{
             }
         }
 
-        /* 日付が不正な値で来た場合はパラメータ無しで「MonthView」へリダイレクトする */
-        if (year == -999 || month == -999 || day == -999){
+        /* IDや日付が不正な値で来た場合はパラメータ無しで「MonthView」へリダイレクトする */
+        if (id == -999 || year == -999 || month == -999 || day == -999){
             res.sendRedirect("/schedule/MonthView");
         }
         String dateStr = year + "-" + month + "-" + day;
@@ -165,15 +177,16 @@ public class ScheduleInsert extends HttpServlet{
         }
 
         try {
-            String sql = "insert into schedule (userid, scheduledate, starttime, endtime, schedule, schedulememo) values (?, ?, ?, ?, ?, ?)";
+            String sql = "update schedule set scheduledate=?, starttime=?, endtime=?, schedule=?, schedulememo=? where id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
 
-            pstmt.setInt(1, 1);
-            pstmt.setString(2, dateStr);
-            pstmt.setString(3, startTimeStr);
-            pstmt.setString(4, endTimeStr);
-            pstmt.setString(5, plan);
-            pstmt.setString(6, memo);
+            pstmt.setString(1, dateStr);
+            pstmt.setString(2, startTimeStr);
+            pstmt.setString(3, endTimeStr);
+            pstmt.setString(4, plan);
+            pstmt.setString(5, memo);
+            pstmt.setInt(6, id);
+
             int num = pstmt.executeUpdate();
 
             pstmt.close();
@@ -183,11 +196,10 @@ public class ScheduleInsert extends HttpServlet{
         }
 
         StringBuffer sb = new StringBuffer();
-        sb.append("/schedule/MonthView");
-        sb.append("?YEAR=");
-        sb.append(year);
-        sb.append("&MONTH=");
-        sb.append(month - 1);
+        sb.append("/schedule/ScheduleView");
+        sb.append("?ID=");
+        sb.append(id);
         res.sendRedirect(new String(sb));
+
     }
 }
