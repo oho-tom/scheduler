@@ -5,6 +5,51 @@
     http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
     version="2.4">
 
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>AuthFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/MonthView</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/NewSchedule</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/ScheduleInsert</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/ScheduleView</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/EditSchedule</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/ScheduleUpdate</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/DeleteCheck</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/ScheduleDelete</url-pattern>
+    </filter-mapping>
+
     <servlet>
         <servlet-name>MonthView</servlet-name>
         <servlet-class>MonthView</servlet-class>
