@@ -85,4 +85,14 @@
         <url-pattern>/ScheduleDelete</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+      <servlet-name>LoginPage</servlet-name>
+      <servlet-class>LoginPage</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>LoginPage</servlet-name>
+      <url-pattern>/LoginPage</url-pattern>
+    </servlet-mapping>
+
 </web-app>
