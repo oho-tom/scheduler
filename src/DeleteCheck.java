@@ -66,6 +66,15 @@ public class DeleteCheck extends HttpServlet{
             res.sendRedirect("/schedule/top.html");
         }
 
+        /* ユーザー情報を取り出す */
+        HttpSession session = req.getSession(false);
+        String username = (String)session.getAttribute("username");
+        String tmpuserid = (String)session.getAttribute("userid");
+        int userid = 0;
+        if (tmpuserid != null){
+            userid = Integer.parseInt(tmpuserid);
+        }
+
         try {
             String sql = "SELECT * FROM schedule WHERE id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -125,6 +134,11 @@ public class DeleteCheck extends HttpServlet{
         sb.append("<body>");
 
         sb.append("<p>");
+        sb.append(username);
+        sb.append("さんのスケジュールです");
+        sb.append("</p>");
+
+        sb.append("<p>");
         sb.append("スケジュールの削除確認&nbsp;&nbsp;");
         sb.append("[<a href=\"/schedule/ScheduleView");
         sb.append("?ID=");
@@ -145,7 +159,7 @@ public class DeleteCheck extends HttpServlet{
             PreparedStatement pstmt = conn.prepareStatement(sql);
 
             String startDateStr = year + "-" + (month + 1) + "-" + day;
-            pstmt.setInt(1, 1);
+            pstmt.setInt(1, userid);
             pstmt.setString(2, startDateStr);
 
             ResultSet rs = pstmt.executeQuery();

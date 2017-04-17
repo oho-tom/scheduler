@@ -164,11 +164,19 @@ public class ScheduleInsert extends HttpServlet{
             endTimeStr = null;
         }
 
+        /* ユーザー情報を取り出す */
+        HttpSession session = req.getSession(false);
+        String tmpuserid = (String)session.getAttribute("userid");
+        int userid = 0;
+        if (tmpuserid != null){
+            userid = Integer.parseInt(tmpuserid);
+        }
+
         try {
             String sql = "insert into schedule (userid, scheduledate, starttime, endtime, schedule, schedulememo) values (?, ?, ?, ?, ?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(sql);
 
-            pstmt.setInt(1, 1);
+            pstmt.setInt(1, userid);
             pstmt.setString(2, dateStr);
             pstmt.setString(3, startTimeStr);
             pstmt.setString(4, endTimeStr);

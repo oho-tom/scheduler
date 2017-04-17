@@ -91,6 +91,15 @@ public class MonthView extends HttpServlet{
             }
         }
 
+        /* ユーザー情報を取り出す */
+        HttpSession session = req.getSession(false);
+        String username = (String)session.getAttribute("username");
+        String tmpuserid = (String)session.getAttribute("userid");
+        int userid = 0;
+        if (tmpuserid != null){
+            userid = Integer.parseInt(tmpuserid);
+        }
+
         StringBuffer sb = new StringBuffer();
 
         sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.0.1//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">");
@@ -114,6 +123,11 @@ public class MonthView extends HttpServlet{
 
         sb.append("</head>");
         sb.append("<body>");
+
+        sb.append("<p>");
+        sb.append(username);
+        sb.append("さんのスケジュールです");
+        sb.append("</p>");
 
         /* 日付データを配列に格納 */
         count = setDateArray(year, month, day, calendarDay, count);
@@ -145,7 +159,7 @@ public class MonthView extends HttpServlet{
             sb.append("</tr>");
 
             /* カレンダーのスケジュール登録画面を作成する */
-            sb.append(createScheduleStr(year, month, i * 7, calendarDay));
+            sb.append(createScheduleStr(year, month, i * 7, calendarDay, userid));
         }
 
         sb.append("</table>");
@@ -157,7 +171,7 @@ public class MonthView extends HttpServlet{
     }
 
     /* スケジュール登録へのリンクを設定する */
-    protected String createScheduleStr(int year, int month, int startDayNo, int[] calendarDay){
+    protected String createScheduleStr(int year, int month, int startDayNo, int[] calendarDay, int userid){
         StringBuffer sb = new StringBuffer();
 
         sb.append("<tr>");
@@ -191,7 +205,7 @@ public class MonthView extends HttpServlet{
                     PreparedStatement pstmt = conn.prepareStatement(sql);
 
                     String startDateStr = year + "-" + (month + 1) + "-" + calendarDay[i];
-                    pstmt.setInt(1, 1);
+                    pstmt.setInt(1, userid);
                     pstmt.setString(2, startDateStr);
 
                     ResultSet rs = pstmt.executeQuery();
