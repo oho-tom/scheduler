@@ -150,4 +150,24 @@
         <url-pattern>/LoginCheck</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>NewUser</servlet-name>
+        <servlet-class>NewUser</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>NewUser</servlet-name>
+        <url-pattern>/NewUser</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CreateUserCheck</servlet-name>
+        <servlet-class>CreateUserCheck</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CreateUserCheck</servlet-name>
+        <url-pattern>/CreateUserCheck</url-pattern>
+    </servlet-mapping>
+
 </web-app>

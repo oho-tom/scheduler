@@ -93,11 +93,29 @@ public class MonthView extends HttpServlet{
 
         /* ユーザー情報を取り出す */
         HttpSession session = req.getSession(false);
-        String username = (String)session.getAttribute("username");
-        String tmpuserid = (String)session.getAttribute("userid");
-        int userid = 0;
-        if (tmpuserid != null){
-            userid = Integer.parseInt(tmpuserid);
+        Object tmp = session.getAttribute("username");
+
+        String username;
+        if (tmp == null){
+            username = "";
+        }else{
+            username = (String)tmp;
+        }
+
+        tmp = session.getAttribute("userid");
+        int userid;
+        if (tmp == null){
+            userid = 0;
+        }else{
+            userid = Integer.parseInt((String)tmp);
+        }
+
+        tmp = session.getAttribute("roll");
+        String roll;
+        if (tmp == null){
+            roll = "";
+        }else{
+            roll = (String)tmp;
         }
 
         StringBuffer sb = new StringBuffer();
@@ -127,6 +145,11 @@ public class MonthView extends HttpServlet{
         sb.append("<p>");
         sb.append(username);
         sb.append("さんのスケジュールです");
+
+        if (roll.equals("1")){
+            sb.append("&nbsp;[<a href=\"/schedule/NewUser\">ユーザーの追加</a>]");
+        }
+
         sb.append("</p>");
 
         /* 日付データを配列に格納 */
