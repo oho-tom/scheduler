@@ -150,6 +150,8 @@ public class MonthView extends HttpServlet{
             sb.append("&nbsp;[<a href=\"/schedule/NewUser\">ユーザーの追加</a>]");
         }
 
+        sb.append("&nbsp;[<a href=\"/schedule/Logout\">ログアウト</a>]");
+
         sb.append("</p>");
 
         /* 日付データを配列に格納 */
