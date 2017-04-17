@@ -140,4 +140,14 @@
       <url-pattern>/LoginPage</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>LoginCheck</servlet-name>
+        <servlet-class>LoginCheck</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>LoginCheck</servlet-name>
+        <url-pattern>/LoginCheck</url-pattern>
+    </servlet-mapping>
+
 </web-app>
